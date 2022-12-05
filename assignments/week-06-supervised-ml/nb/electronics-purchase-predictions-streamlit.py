@@ -3,6 +3,11 @@ import plotly.express as px
 import plotly.figure_factory as ff
 import streamlit as st
 import streamlit.components.v1 as components
+from streamlit_shap import st_shap
+import shap
+import py7zr
+import pickle
+import os.path
 
 # Display Wal-Mart Labs logo.
 st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Walmart_Labs_logo.svg/1024px-Walmart_Labs_logo.svg.png" )
@@ -15,6 +20,16 @@ model_results_df = pd.read_csv("../dat/model_results.csv")
 
 # Drop uniformative columns
 train_df.drop(columns=["year", "month", "Weekend"], inplace=True)
+
+# SHAP values
+if not os.path.isfile('shap_gbt.p'):
+    archive = py7zr.SevenZipFile('shap_gbt.7z', mode='r')
+    archive.extractall(path='')
+    archive.close()
+shap_values_gbt = pickle.load(open('shap_gbt.p', 'rb'))
+model_shap_dict = {'Logistic Regression': 'no shap values available',
+                    'SVM': 'no shap values available',
+                    'Gradient Boosting Classifier': shap_values_gbt}
 
 
 # Create sidebar for user selection
@@ -142,14 +157,23 @@ with tab2:
         # Write plotly chart and fit to the container width.
         st.plotly_chart(fig2, use_container_width=True)
 
-with tab3: 
-    # YOUR CODE GOES HERE!
-        # Use tab2 as a guide!  
-        # Use columns to separate visualizations for models
-        # Include a plot for local and global explanability!
-     
-    st.header(model1_select)
-    
-    st.header(model2_select)
+with tab3:       
 
-    
+    # Columns for side-by-side model comparison
+    col1, col2 = st.columns(2)
+     
+    with col1:
+        st.header(model1_select)
+        res1 = model_shap_dict.get(model1_select)
+        if isinstance(res1, str):
+            st.text(res1)
+        else:
+            st_shap(shap.summary_plot(res1), height=300) # takes a while to load
+
+    with col2:
+        st.header(model2_select)
+        res2 = model_shap_dict.get(model2_select)
+        if isinstance(res2, str):
+            st.text(res2)
+        else:
+            st_shap(shap.summary_plot(res2), height=300) # takes a while to load
