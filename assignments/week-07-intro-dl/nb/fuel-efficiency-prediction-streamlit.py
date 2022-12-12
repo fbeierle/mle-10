@@ -15,6 +15,14 @@ st.markdown("<h1 style='text-align: center; color: black;'>Fuel Efficiency</h1>"
 train_df = pd.read_csv("../dat/train.csv.gz", compression="gzip")
 model_results_df = pd.read_csv("../dat/model_results.csv")
 
+# Images for SHAP
+img_shap_tpot = Image.open("../img/tpot.png")
+img_shap_dnn = Image.open("../img/dnn.png")
+
+# SHAP dict
+shap_dict = {'TPOT': img_shap_tpot,
+             'DNN': img_shap_dnn}
+
 # Create sidebar for user selection
 with st.sidebar:
     # Add FB logo
@@ -22,7 +30,6 @@ with st.sidebar:
 
     # Available models for selection
 
-    # YOUR CODE GOES HERE!
     models = ["DNN", "TPOT"]
 
     # Add model select boxes
@@ -59,32 +66,34 @@ with tab1:
 
 with tab2:    
     
-    # YOUR CODE GOES HERE!
+    model1_results = model_results_df[model_results_df['model'] == model1_select]
 
     # Columns for side-by-side model comparison
     col1, col2 = st.columns(2)
 
-    # Build the confusion matrix for the first model.
+
     with col1:
         st.header(model1_select)
+        st.text(model1_results)
 
-        # YOUR CODE GOES HERE!
 
-
-    # Build confusion matrix for second model
     with col2:
+        model2_results = model_results_df[model_results_df['model'] == model2_select]
         st.header(model2_select)
-
-        # YOUR CODE GOES HERE!
+        st.text(model2_results)
 
 
 with tab3: 
-    # YOUR CODE GOES HERE!
-        # Use columns to separate visualizations for models
-        # Include plots for local and global explanability!
-     
-    st.header(model1_select)
     
-    st.header(model2_select)
-
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.header(model1_select)
+        res1 = shap_dict.get(model1_select)
+        st.image(res1, width=350)
+    
+    with col2:
+        st.header(model2_select)
+        res2 = shap_dict.get(model2_select)
+        st.image(res2, width=350)
     
